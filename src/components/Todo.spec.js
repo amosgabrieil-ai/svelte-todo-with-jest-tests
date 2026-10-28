@@ -38,4 +38,15 @@ describe("Todo", () => {
 
     expect(screen.getByText(todoNotDone.text)).not.toHaveClass("done");
   });
+    test("dispatches toggleDone when the checkbox is clicked", async () => {
+    const { component } = render(Todo, { props: { todo: todoNotDone } });
+    const handler = jest.fn();
+
+    component.$on("toggleDone", handler);
+
+    await fireEvent.click(screen.getByLabelText("Done"));
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(handler.mock.calls[0][0].detail).toEqual(todoNotDone);
+  });
 });

@@ -1,4 +1,4 @@
-import { screen, render } from "@testing-library/svelte";
+import { screen, render, fireEvent } from "@testing-library/svelte";
 
 import TodoList from "./TodoList.svelte";
 
@@ -28,5 +28,17 @@ describe("TodoList", () => {
   test("should show an empty list when the todos prop is not provided", () => {
     render(TodoList);
     expect(screen.getByText("Congratulations, all done!"));
+  });
+    test("should forward toggleDone event from Todo", async () => {
+    const { component } = render(TodoList, { props: { todos } });
+    const handler = jest.fn();
+
+    component.$on("toggleDone", handler);
+
+    const checkbox = screen.getAllByLabelText("Done")[0];
+    await fireEvent.click(checkbox);
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(handler.mock.calls[0][0].detail).toEqual(todos[0]);
   });
 });
