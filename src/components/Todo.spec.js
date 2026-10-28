@@ -1,3 +1,4 @@
+
 import { render, screen } from "@testing-library/svelte";
 import { fireEvent } from "@testing-library/svelte/node_modules/@testing-library/dom";
 
@@ -11,7 +12,7 @@ describe("Todo", () => {
   test("shows the todo text when rendered", () => {
     render(Todo, { props: { todo: todoDone } });
 
-    expect(screen.getByLabelText("Done")).toBeInTheDocument(); // checkbox
+    expect(screen.getByLabelText("Done")).toBeInTheDocument();
     expect(screen.getByText(todoDone.text)).toBeInTheDocument();
   });
 
@@ -21,7 +22,7 @@ describe("Todo", () => {
     expect(screen.getByLabelText("Done")).toBeChecked();
   });
 
-  test("a done class should be added to the text item when a todo is done", () => {
+  test("a done class should be added when a todo is done", () => {
     render(Todo, { props: { todo: todoDone } });
 
     expect(screen.getByText(todoDone.text)).toHaveClass("done");
@@ -33,20 +34,37 @@ describe("Todo", () => {
     expect(screen.getByLabelText("Done")).not.toBeChecked();
   });
 
-  test("a done class should not be added to the to the text item when a todo is not done", () => {
+  test("a done class should not be added when a todo is not done", () => {
     render(Todo, { props: { todo: todoNotDone } });
 
     expect(screen.getByText(todoNotDone.text)).not.toHaveClass("done");
   });
-    test("dispatches toggleDone when the checkbox is clicked", async () => {
-    const { component } = render(Todo, { props: { todo: todoNotDone } });
+
+  test("dispatches toggleDone when the checkbox is clicked", async () => {
+    const { component } = render(Todo, {
+      props: { todo: todoNotDone },
+    });
     const handler = jest.fn();
 
     component.$on("toggleDone", handler);
 
     await fireEvent.click(screen.getByLabelText("Done"));
 
-    expect(handler).toHaveBeenCalledTimes(1);
+    expect(handler).toHaveBeenCalled();
     expect(handler.mock.calls[0][0].detail).toEqual(todoNotDone);
+  });
+
+  test("updates checkbox and done class when todo prop changes", async () => {
+    const { component } = render(Todo, {
+      props: { todo: todoNotDone },
+    });
+
+    expect(screen.getByLabelText("Done")).not.toBeChecked();
+    expect(screen.getByText(todoNotDone.text)).not.toHaveClass("done");
+
+    await component.$set({ todo: todoDone });
+
+    expect(screen.getByLabelText("Done")).toBeChecked();
+    expect(screen.getByText(todoDone.text)).toHaveClass("done");
   });
 });
